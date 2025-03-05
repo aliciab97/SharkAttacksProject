@@ -35,3 +35,33 @@ From Shark_Attacks..attacks$
 where year between 1917 and 2017
 group by year
 order by 1,2
+	
+
+-- fatal vs age
+select age, [Fatal (Y/N)]
+from Shark_Attacks..attacks$
+where year between 1917 and 2017 
+and age is not null
+and [Fatal (Y/N)] is not null
+order by 1,2
+
+
+-- rate of change throughout the years
+
+with cte as(
+select year,
+count(type) as attacks_per_year 
+
+from Shark_Attacks..attacks$
+where year between 1917 and 2017
+and year is not null 
+and type is not null
+
+group by year
+)
+select year, attacks_per_year,
+(attacks_per_year - LAG(attacks_per_year,1) OVER (order by YEAR(year)))/
+	NULLIF(LAG(attacks_per_year,1) OVER (order by YEAR(year)),0) as rate_of_change
+
+from cte
+order by 1,2
